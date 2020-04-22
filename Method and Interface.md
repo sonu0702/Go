@@ -1,3 +1,4 @@
+## Example 1
 ```go
 type geometry interface{
 	area() float64
@@ -26,3 +27,51 @@ func main(){
 	fmt.Println(value)	
 }
 ```
+## Example 2
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type writer interface {
+	write()
+}
+
+type reader interface{
+	read()
+}
+
+type writeread interface {
+	reader
+	writer
+}
+
+type data struct {
+	value string
+}
+
+func (d data) read(){
+	fmt.Println("I am reading")
+}
+
+func (d data) write(){
+	fmt.Println("I am writing")
+}
+
+func operation(wr writeread){
+	wr.read()
+	wr.write()
+}
+
+
+func main(){
+	fmt.Println("data fetched")
+	dd := data{"Nothing"}
+	operation(dd)
+}
+```
+
