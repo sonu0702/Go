@@ -75,3 +75,70 @@ func main(){
 }
 ```
 
+## Example 3
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type objStr struct {}
+
+
+type noStr struct {}
+
+type generator interface {
+	foo()
+}
+
+func (o objStr) foo(){
+	fmt.Println(o)
+}
+
+func simple() generator {
+	return &objStr{}
+}
+
+func main(){
+	fmt.Println("data fetched")
+	ov := simple()
+	fmt.Println(ov)
+}
+
+```
+
+## Example 4
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type myValuer interface{
+	myValue()
+}
+
+type gitObject struct{
+	value int
+}
+
+func (g *gitObject) myValue(){
+	fmt.Printf("my value by pointer %d",g.value)
+}
+
+func retP() myValuer{
+	return &gitObject{2}
+}
+
+func main(){
+	fmt.Println("data fetched")
+	wp := retP()
+	wp.myValue()
+}
+```
+
