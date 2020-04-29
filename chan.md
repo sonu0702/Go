@@ -53,3 +53,91 @@ func main() {
 	fmt.Println(time.Now())
 }
 ```
+## Example
+
+```go
+package main
+
+import (
+	"math/rand"
+	"errors"
+	"fmt"
+	"time"
+)
+
+//Result d
+type Result struct {
+	Title string
+	URL   string
+}
+
+//SearchFunc d
+type SearchFunc func(query string) Result
+
+//FakeSearch is to FakeSearch
+func FakeSearch(kind, title, url string) SearchFunc {
+
+	return func(query string) Result {
+		time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+		return Result{
+			Title: fmt.Sprintf("%s(%q) : %s", kind, query, title),
+			URL:   url,
+		}
+	}
+}
+
+var (
+	web   = FakeSearch("web", "This is Web", "https://fake-search-url/")
+	image = FakeSearch("image", "This is image", "https://fake-search-url")
+	video = FakeSearch("video", "This is Video", "https://fake-search-url")
+)
+
+//Search gives result
+func Search(query string) ([]Result, error) {
+
+	res := []Result{
+		web("where is india"),
+		image("my mom"),
+		video("hello done"),
+	}
+	return res, nil
+
+}
+
+//SearchParallel for result
+func SearchParallel(query string) ([]Result, error) {
+	c := make(chan Result, 3)
+	go func() { c <- web("golang") }()
+	go func() { c <- image("golang") }()
+	go func() { c <- video("golang") }()
+	return []Result{<-c, <-c, <-c}, nil
+}
+
+//SearchTimeout with result
+func SearchTimeout(query string, timeout time.Duration) ([]Result, error) {
+	timer := time.After(timeout)
+	c := make(chan Result, 3)
+	go func() { c <- web("golang") }()
+	go func() { c <- image("golang") }()
+	go func() { c <- video("golang") }()
+
+	var results []Result
+	for i := 0; i < 3; i++ {
+		select {
+		case result := <-c:
+			results = append(results, result)
+
+		case <-timer:
+			return results, errors.New("timedout")
+		}
+	}
+	return results,nil
+}
+func main() {
+	start := time.Now()
+	fmt.Println(SearchTimeout("Golang", 100*time.Millisecond))
+	// fmt.Println(SearchParallel("golang"))
+	fmt.Println(time.Since(start))
+}
+
+```
